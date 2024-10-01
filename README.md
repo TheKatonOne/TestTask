@@ -140,9 +140,14 @@
         }
     ]
 }
-
 ```
 
+* **Success (200 OK)**:
+```
+{
+    "message": "Organization is not related to other organizations."
+}
+```
 * **Error (404 Not Found):**
 ```
 {"error":"Organization not found."}
