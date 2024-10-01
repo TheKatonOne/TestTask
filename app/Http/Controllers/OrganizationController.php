@@ -3,13 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Models\Organization;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Request;
 
 class OrganizationController extends Controller
 {
     public function storeOrganizationWithRelations(Request $request)
     {
-        $organizationData = $request->all();
+        if ($request->has('org_name')){
+            $organizationData = $request->all();
+        } else{
+            return response()->json(['error' => 'org_name is required.'], 400);
+        }
+
+
 
         // Store the organization
         $this->storeOrganization($organizationData['org_name'], $organizationData['daughters'] ?? []);
@@ -36,8 +43,11 @@ class OrganizationController extends Controller
     public function getOrganizationRelations(Request $request, $name)
     {
         $name = str_replace('_', ' ', $name);
-
-        $organization = Organization::where('name', $name)->firstOrFail();
+        try {
+            $organization = Organization::where('name', $name)->firstOrFail();
+        } catch (ModelNotFoundException $e) {
+            return response()->json(['error' => 'Organization not found.'], 404);
+        }
 
         $parents = $organization->parents()->get();
         $parentRelations = $parents->isNotEmpty() ? $parents->map(function ($parent) {
